@@ -46,6 +46,16 @@ function formatDisplay(dateString: string) {
   });
 }
 
+function formatDateToSlashes(dateStr: string): string {
+  if (!dateStr) return '';
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const [, year, month, day] = match;
+    return `${day}/${month}/${year}`;
+  }
+  return dateStr;
+}
+
 function getDefaultStatus(dateString: string): AvailabilityStatus {
   return new Date(dateString).getDay() === 0 ? 'appointment_only' : 'open';
 }
@@ -243,9 +253,10 @@ export default function AdminApp() {
 
   const sendWhatsAppMessage = (booking: Booking, confirmed: boolean) => {
     const base = 'https://wa.me/263777554619';
+    const formattedDate = formatDateToSlashes(booking.preferred_date);
     const message = confirmed
-      ? `Hi ${booking.client_name}! Your booking for ${booking.service_requested} on ${booking.preferred_date} at Charisma Beauty Studio has been confirmed. Please ensure your $10 deposit has been sent to +263 777554619. See you then! 💄`
-      : `Hi ${booking.client_name}, unfortunately we are unable to accommodate your booking for ${booking.preferred_date}. Please contact us to reschedule. We apologise for any inconvenience.`;
+      ? `Hi ${booking.client_name}! Your booking for ${booking.service_requested} on ${formattedDate} at Charisma Beauty Studio has been confirmed. Please ensure your $10 deposit has been sent to +263 777554619. See you then! 💄`
+      : `Hi ${booking.client_name}, unfortunately we are unable to accommodate your booking for ${formattedDate}. Please contact us to reschedule. We apologise for any inconvenience.`;
 
     window.open(`${base}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -647,7 +658,7 @@ export default function AdminApp() {
                     <tr key={booking.id} className="border-b border-[#F0EBEB]/50 hover:bg-[#FDF9F7]/60 transition-colors">
                       <td className="py-4 font-bold text-[#1A1A1A]">{booking.client_name}</td>
                       <td className="py-4">{booking.service_requested}</td>
-                      <td className="py-4 font-medium text-[#1A1A1A]">{booking.preferred_date}</td>
+                      <td className="py-4 font-medium text-[#1A1A1A]">{formatDateToSlashes(booking.preferred_date)}</td>
                       <td className="py-4">{booking.client_phone}</td>
                       <td className="py-4 max-w-[200px] truncate">{booking.notes || 'None'}</td>
                       

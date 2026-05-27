@@ -212,11 +212,22 @@ export default function App() {
     }
   };
 
+  const formatDateToSlashes = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+      const [, year, month, day] = match;
+      return `${day}/${month}/${year}`;
+    }
+    return dateStr;
+  };
+
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid || selectedDateStatus === 'fully_booked') return;
 
-    const message = `Hello Charisma Beauty Studio! I'd like to book ${selectedService?.name} on ${formData.date}. Name: ${formData.name}. Phone: ${formData.phone}. Special requests: ${formData.notes || 'None'}. I will send proof of $10 deposit payment.`;
+    const formattedDate = formatDateToSlashes(formData.date);
+    const message = `Hello Charisma Beauty Studio! I'd like to book ${selectedService?.name} on ${formattedDate}. Name: ${formData.name}. Phone: ${formData.phone}. Special requests: ${formData.notes || 'None'}. I will send proof of $10 deposit payment.`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/263777554619?text=${encodedMessage}`;
 
@@ -373,7 +384,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             
             {/* Left side (text) */}
-            <div className="space-y-6 text-center md:text-left order-2 md:order-1 max-w-xl mx-auto md:mx-0">
+            <div className="space-y-6 text-center md:text-left max-w-xl mx-auto md:mx-0">
               <span className="text-[11px] font-inter font-bold tracking-[0.3em] text-[#C9A96E] uppercase block">
                 BEAUTY STUDIO — AVONDALE, HARARE
               </span>
@@ -404,7 +415,7 @@ export default function App() {
             </div>
 
             {/* Right side (image) */}
-            <div className="order-1 md:order-2 w-full flex justify-center px-4">
+            <div className="w-full flex justify-center px-4">
               <div className="relative w-full max-w-md md:max-w-lg aspect-[4/5] rounded-[20px] overflow-hidden shadow-luxury">
                 <img 
                   src={heroBg} 
