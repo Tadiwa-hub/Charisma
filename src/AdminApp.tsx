@@ -508,7 +508,7 @@ export default function AdminApp() {
             </div>
 
             {/* Calendar Cells */}
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {monthCells.map((cell, index) => {
                 if (!cell) {
                   return <div key={`empty-${index}`} className="aspect-square rounded-xl bg-[#FDF9F7]/40" />;
@@ -518,29 +518,45 @@ export default function AdminApp() {
                 const status = getCellStatus(cell);
                 const isToday = formatDate(cell) === formatDate(new Date());
 
+                // Past Date check
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isPast = cell < today;
+                
+                const isFullyBooked = status === 'fully_booked';
+                const shouldSlash = isFullyBooked || isPast;
+
                 return (
                   <button
                     key={isoDate}
                     type="button"
                     onClick={() => handleDateCellClick(cell)}
-                    className={`group relative aspect-square rounded-xl border flex flex-col justify-between p-2.5 text-left transition-all active-press ${
+                    className={`group relative aspect-square rounded-xl border flex flex-col justify-between p-1 sm:p-2.5 text-left transition-all active-press ${
                       isToday 
                         ? 'border-[#C9A96E] bg-[#FDF9F7]' 
                         : 'border-[#F0EBEB] bg-white hover:border-[#C9A96E]/50'
-                    }`}
+                    } ${isPast ? 'opacity-40' : ''}`}
                   >
-                    <span className={`text-xs font-semibold ${isToday ? 'text-[#C9A96E]' : 'text-[#1A1A1A]'}`}>
+                    <span className={`text-xs font-semibold ${
+                      isToday 
+                        ? 'text-[#C9A96E]' 
+                        : shouldSlash 
+                          ? 'text-[#E53935] line-through font-normal' 
+                          : 'text-[#1A1A1A]'
+                    }`}>
                       {cell.getDate()}
                     </span>
 
                     {/* Small Status indicator */}
                     <div className="w-full flex justify-end">
-                      <span className={`w-2 h-2 rounded-full block border ${
-                        status === 'open' 
-                          ? 'bg-[#4CAF50] border-[#4CAF50]/30' 
-                          : status === 'fully_booked' 
-                            ? 'bg-[#E53935] border-[#E53935]/30' 
-                            : 'bg-[#C9A96E] border-[#C9A96E]/30'
+                      <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full block border ${
+                        isPast
+                          ? 'bg-[#AAAAAA] border-[#AAAAAA]/30'
+                          : status === 'open' 
+                            ? 'bg-[#4CAF50] border-[#4CAF50]/30' 
+                            : status === 'fully_booked' 
+                              ? 'bg-[#E53935] border-[#E53935]/30' 
+                              : 'bg-[#C9A96E] border-[#C9A96E]/30'
                       }`} />
                     </div>
                   </button>

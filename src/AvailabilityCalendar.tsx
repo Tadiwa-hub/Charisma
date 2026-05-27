@@ -101,7 +101,7 @@ export default function AvailabilityCalendar({
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {monthGrid.map((cell, index) => {
           if (!cell) {
             return <div key={`empty-${index}`} className="aspect-square rounded-xl bg-[#FDF9F7]/40" />;
@@ -113,22 +113,30 @@ export default function AvailabilityCalendar({
           const isFullyBooked = status === 'fully_booked';
           const isAppointmentOnly = status === 'appointment_only';
 
+          // Check if the date is in the past
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const isPast = cell < today;
+          
+          const shouldSlash = isFullyBooked || isPast;
+          const isDisabled = shouldSlash;
+
           return (
             <button
               key={isoDate}
               type="button"
-              onClick={() => !isFullyBooked && onSelectDate(isoDate)}
-              disabled={isFullyBooked}
-              className={`group relative aspect-square rounded-xl border flex flex-col items-center justify-center p-1 text-center transition-all active-press ${
+              onClick={() => !isDisabled && onSelectDate(isoDate)}
+              disabled={isDisabled}
+              className={`group relative aspect-square rounded-xl border flex flex-col items-center justify-center p-0.5 sm:p-1 text-center transition-all active-press ${
                 isSelected 
                   ? 'border-[#C9A96E] bg-[#FDF9F7] text-[#1A1A1A] font-semibold' 
                   : 'border-[#F0EBEB] bg-white hover:border-[#C9A96E]/50 text-[#1A1A1A]'
-              } ${isFullyBooked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+              } ${isDisabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
             >
               {/* Date Number with Availability Modifiers */}
               <div className="relative">
-                <span className={`text-sm font-inter ${
-                  isFullyBooked ? 'text-[#E53935] line-through font-normal' : ''
+                <span className={`text-xs sm:text-sm font-inter ${
+                  shouldSlash ? 'text-[#E53935] line-through font-normal' : ''
                 } ${
                   isSelected ? 'font-bold' : 'font-medium'
                 }`}>
@@ -136,15 +144,15 @@ export default function AvailabilityCalendar({
                 </span>
                 
                 {/* Appointment Only Asterisk */}
-                {isAppointmentOnly && (
+                {isAppointmentOnly && !isPast && (
                   <span className="absolute -top-1.5 -right-2 text-[#C9A96E] text-xs font-bold font-inter">
                     *
                   </span>
                 )}
               </div>
 
-              {/* Minimal text label for accessibility / details */}
-              <span className={`text-[8px] uppercase tracking-tighter mt-0.5 block ${
+              {/* Minimal text label for accessibility / details - hidden on mobile to prevent overlapping */}
+              <span className={`text-[8px] uppercase tracking-tighter mt-0.5 hidden sm:block ${
                 isFullyBooked 
                   ? 'text-[#E53935]/70' 
                   : isAppointmentOnly 
