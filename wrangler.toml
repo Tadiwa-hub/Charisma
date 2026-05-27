@@ -1,0 +1,11 @@
+name = "charismabeauty"
+main = "worker/index.ts"
+compatibility_date = "2026-05-27"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "CHARISMA_DB"
+
+[site]
+bucket = "./dist"
+entry-point = "worker"
