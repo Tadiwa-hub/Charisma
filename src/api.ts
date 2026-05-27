@@ -4,7 +4,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 function buildUrl(path: string, query?: Record<string, string>) {
   const url = new URL(path, window.location.origin);
-  url.pathname = `${API_BASE}${path}`.replace(/\/\/g, '/');
+  url.pathname = `${API_BASE}${path}`.replace(/\/\//g, '/');
 
   if (query) {
     Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));

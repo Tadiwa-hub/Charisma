@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Calendar,
   Clock,
   CheckCircle2,
   LogOut,
   Users,
   Shield,
-  MessageSquare,
   ChevronLeft,
   ArrowRight,
 } from 'lucide-react';
@@ -50,10 +48,6 @@ function getDefaultStatus(dateString: string): AvailabilityStatus {
   return new Date(dateString).getDay() === 0 ? 'appointment_only' : 'open';
 }
 
-function getStatusLabel(status: AvailabilityStatus) {
-  return STATUSES[status]?.label || 'Open';
-}
-
 export default function AdminApp() {
   const [password, setPassword] = useState('');
   const [loggedIn, setLoggedIn] = useState(false);
@@ -62,11 +56,11 @@ export default function AdminApp() {
   const [loginError, setLoginError] = useState('');
   const [availability, setAvailability] = useState<AvailabilityEntry[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loadingAvailability, setLoadingAvailability] = useState(false);
-  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [, setLoadingAvailability] = useState(false);
+  const [, setLoadingBookings] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<AvailabilityStatus>('open');
-  const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [calendarMonth] = useState(new Date());
   const [popupOpen, setPopupOpen] = useState(false);
   const [bulkFrom, setBulkFrom] = useState('');
   const [bulkTo, setBulkTo] = useState('');
@@ -292,8 +286,8 @@ export default function AdminApp() {
   };
 
   if (!loggedIn) {
-    const isLocked = lockUntil && lockUntil > Date.now();
-    const remainingMin = isLocked ? Math.ceil((lockUntil - Date.now()) / 60000) : 0;
+    const isLocked = Boolean(lockUntil && lockUntil > Date.now());
+    const remainingMin = isLocked && lockUntil ? Math.ceil((lockUntil - Date.now()) / 60000) : 0;
 
     return (
       <div className="min-h-screen bg-[#F8F4F0] text-slate-900 px-4 py-10 sm:px-6 lg:px-8">

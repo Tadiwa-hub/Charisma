@@ -24,7 +24,6 @@ const AdminApp = lazy(() => import('./AdminApp'));
 
 // --- Image Imports ---
 import heroBg from './assets/hero-bg.jpg';
-import m1 from './assets/makeup-1.jpg';
 import m2 from './assets/makeup-2.jpg';
 import m3 from './assets/makeup-3.jpg';
 import m4 from './assets/makeup-4.jpg';
@@ -199,9 +198,6 @@ export default function App() {
     e.preventDefault();
     if (!isFormValid || selectedDateStatus === 'fully_booked') return;
 
-    const addonsText = selectedAddons.length > 0 
-      ? selectedAddons.map(a => a.name).join(', ') 
-      : 'None';
     const message = `Hello Charisma Beauty Studio! I'd like to book ${selectedService?.name} on ${formData.date}. Name: ${formData.name}. Phone: ${formData.phone}. Special requests: ${formData.notes || 'None'}. I will send proof of $10 deposit payment.`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/263777554619?text=${encodedMessage}`;

@@ -3,12 +3,6 @@ import type { AvailabilityEntry, AvailabilityStatus } from './types';
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const STATUS_MAP: Record<AvailabilityStatus, { label: string; badge: string; ring: string }> = {
-  open: { label: 'Open', badge: 'bg-emerald-100 text-emerald-900', ring: 'ring-emerald-300/40' },
-  fully_booked: { label: 'Fully Booked', badge: 'bg-rose-100 text-rose-900', ring: 'ring-rose-300/40' },
-  appointment_only: { label: 'Appointment Only', badge: 'bg-amber-100 text-amber-900', ring: 'ring-amber-300/40' },
-};
-
 function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
