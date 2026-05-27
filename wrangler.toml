@@ -1,8 +1,3 @@
 name = "charismabeauty"
 compatibility_date = "2026-05-27"
 pages_build_output_dir = "dist"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "CHARISMA_DB"
-database_id = "00000000-0000-0000-0000-000000000000" # Placeholder: Replace with actual D1 Database ID (UUID)
