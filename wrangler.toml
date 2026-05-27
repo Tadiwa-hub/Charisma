@@ -1,3 +1,8 @@
 name = "charismabeauty"
 compatibility_date = "2026-05-27"
 pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "CHARISMA_DB"
+database_id = "ac7a0e85-4788-4b49-89dd-95653a462f03"
