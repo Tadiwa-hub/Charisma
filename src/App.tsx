@@ -68,10 +68,10 @@ interface Addon {
 // --- Data ---
 const SERVICES: Service[] = [
   { id: 'm-artist', name: 'Makeup by Studio Artist', price: 35, category: 'SERVICES', description: 'Professional in-house artists personally trained by Charisma', image: m2, displayPrice: 'Contact for pricing', icon: '💄' },
-  { id: 'studio-artists-combo', name: 'Studio Artists Combo', price: 60, category: 'SERVICES', description: 'Hair installation and makeup combo package', image: m3, displayPrice: 'From $60', icon: '✨' },
-  { id: 'brow-service', name: 'Brow Service', price: 100, category: 'SERVICES', description: 'Semi-permanent eyebrows lasting 2+ years', image: m4, displayPrice: '$100', icon: '👁️' },
-  { id: 'manicure-pedicure', name: 'Manicure & Pedicure', price: 15, category: 'SERVICES', description: 'Full treatment from scrubbing to painting hands and toes', image: m5, displayPrice: 'From $15', icon: '💅' },
-  { id: 'makeup-classes', name: 'Makeup Classes', price: 150, category: 'SERVICES', description: 'Learn tips and tricks from the professionals', image: m6, displayPrice: 'From $150', icon: '🎓' },
+  { id: 'studio-artists-combo', name: 'Studio Artists Combo', price: 60, category: 'SERVICES', description: 'A discounted combination package of hair installation and makeup', image: m3, displayPrice: 'From $60', icon: '✨' },
+  { id: 'brow-service', name: 'Brow Service', price: 100, category: 'SERVICES', description: 'Semi permanent eyebrows /tatoo drawn to your liking ,lasting you for 2 years or more depending on maintenance', image: m4, displayPrice: '$100', icon: '👁️' },
+  { id: 'manicure-pedicure', name: 'Manicure & Pedicure', price: 15, category: 'SERVICES', description: 'From scrubbing your feet to painting both your hands and toes. Choose what works best for you', image: m5, displayPrice: 'From $15', icon: '💅' },
+  { id: 'makeup-classes', name: 'Makeup Classes', price: 150, category: 'SERVICES', description: 'Learn the tips and tricks yourself. You’re one step away from becoming a pro', image: m6, displayPrice: 'From $150', icon: '🎓' },
 ];
 
 const ADDONS: Addon[] = [
@@ -639,7 +639,7 @@ export default function App() {
             </div>
             
             <p className="text-sm font-inter text-[#6B6B6B] leading-relaxed">
-              A non-refundable deposit of <span className="text-[#C9A96E] font-bold">$10</span> is required to confirm your booking. This secures your timing slot and is fully deducted from your final payment on the day of styling.
+              To secure your appointment, kindly pay a <span className="text-[#C9A96E] font-bold">$10 (non-refundable)</span> deposit. Payment can either be done online (EcoCash USD / InnBucks) or paid in cash. This secures your timing slot and is fully deducted from your final payment on the day of styling.
             </p>
 
             {/* Info boxes for pay channels */}
@@ -660,7 +660,7 @@ export default function App() {
             </div>
 
             <p className="text-xs font-inter italic text-[#AAAAAA] mt-2">
-              Note: "Send proof of payment with your WhatsApp booking confirmation."
+              Note: "Please include transfer/transaction charges and send confirmation once you make payment. Thank you!"
             </p>
           </div>
         </section>
