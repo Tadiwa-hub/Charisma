@@ -62,54 +62,56 @@ export default function AvailabilityCalendar({
   const monthLabel = currentMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+    <div className="bg-white p-6 rounded-2xl border border-[#F0EBEB] luxury-shadow space-y-6">
+      {/* Calendar Header */}
+      <div className="flex items-center justify-between gap-4 pb-2 border-b border-[#F0EBEB]">
         <div>
-          <h4 className="text-sm uppercase tracking-[0.35em] text-rose-gold">Preferred Date</h4>
-          <p className="text-xs text-slate-400">Tap a date to select from the calendar.</p>
+          <h4 className="text-base font-garamond font-bold tracking-wider text-[#1A1A1A]">Select Date</h4>
+          <p className="text-xs font-inter text-[#6B6B6B]">Select a preferred slot below</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-400">
+        
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => onMonthChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-            className="rounded-sm border border-slate-700 px-3 py-1 hover:border-rose-gold/70"
+            className="w-8 h-8 rounded-full border border-[#F0EBEB] flex items-center justify-center text-xs text-[#6B6B6B] hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all active-press"
           >
-            Prev
+            ←
           </button>
-          <span className="font-semibold">{monthLabel}</span>
+          <span className="text-sm font-garamond font-bold tracking-wide text-[#1A1A1A] min-w-[100px] text-center">
+            {monthLabel}
+          </span>
           <button
             type="button"
             onClick={() => onMonthChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-            className="rounded-sm border border-slate-700 px-3 py-1 hover:border-rose-gold/70"
+            className="w-8 h-8 rounded-full border border-[#F0EBEB] flex items-center justify-center text-xs text-[#6B6B6B] hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all active-press"
           >
-            Next
+            →
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 text-[10px] uppercase tracking-[0.3em] text-slate-500">
+      {/* Weekday Titles */}
+      <div className="grid grid-cols-7 gap-2 text-center text-[11px] font-inter font-semibold uppercase tracking-widest text-[#AAAAAA]">
         {DAY_LABELS.map((day) => (
-          <div key={day} className="text-center font-semibold">
+          <div key={day} className="py-1">
             {day}
           </div>
         ))}
       </div>
 
+      {/* Days Grid */}
       <div className="grid grid-cols-7 gap-2">
         {monthGrid.map((cell, index) => {
           if (!cell) {
-            return <div key={`empty-${index}`} className="h-14 rounded-lg bg-white/5" />;
+            return <div key={`empty-${index}`} className="aspect-square rounded-xl bg-[#FDF9F7]/40" />;
           }
 
           const isoDate = formatDate(cell);
           const status = (availabilityMap[isoDate] as AvailabilityStatus) || getDefaultStatus(isoDate);
           const isSelected = selectedDate === isoDate;
           const isFullyBooked = status === 'fully_booked';
-          const statusStyle = status === 'open'
-            ? 'bg-emerald-100 text-emerald-900'
-            : status === 'appointment_only'
-              ? 'bg-amber-100 text-amber-900'
-              : 'bg-rose-100 text-rose-900';
+          const isAppointmentOnly = status === 'appointment_only';
 
           return (
             <button
@@ -117,30 +119,71 @@ export default function AvailabilityCalendar({
               type="button"
               onClick={() => !isFullyBooked && onSelectDate(isoDate)}
               disabled={isFullyBooked}
-              className={`group relative min-h-[3.5rem] rounded-lg border px-2 py-2 text-left text-xs transition-all ${
-                isSelected ? 'border-rose-gold bg-rose-gold/10 shadow-sm' : 'border-white/10 bg-white/5 hover:border-rose-gold/30 hover:bg-white/10'
-              } ${isFullyBooked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${status === 'appointment_only' ? 'ring-amber-200/50' : ''}`}
+              className={`group relative aspect-square rounded-xl border flex flex-col items-center justify-center p-1 text-center transition-all active-press ${
+                isSelected 
+                  ? 'border-[#C9A96E] bg-[#FDF9F7] text-[#1A1A1A] font-semibold' 
+                  : 'border-[#F0EBEB] bg-white hover:border-[#C9A96E]/50 text-[#1A1A1A]'
+              } ${isFullyBooked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
             >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">{cell.getDate()}</span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
-                  {status === 'open' ? '🟢' : status === 'appointment_only' ? '🟡' : '🔴'}
+              {/* Date Number with Availability Modifiers */}
+              <div className="relative">
+                <span className={`text-sm font-inter ${
+                  isFullyBooked ? 'text-[#E53935] line-through font-normal' : ''
+                } ${
+                  isSelected ? 'font-bold' : 'font-medium'
+                }`}>
+                  {cell.getDate()}
                 </span>
+                
+                {/* Appointment Only Asterisk */}
+                {isAppointmentOnly && (
+                  <span className="absolute -top-1.5 -right-2 text-[#C9A96E] text-xs font-bold font-inter">
+                    *
+                  </span>
+                )}
               </div>
-              <div className="mt-2 text-[10px] leading-tight text-slate-300">
-                {status === 'open' ? 'Available' : status === 'appointment_only' ? 'Appointment only' : 'Fully booked'}
-              </div>
-              {isFullyBooked && (
-                <div className="pointer-events-none absolute inset-0 rounded-lg bg-black/10" />
+
+              {/* Minimal text label for accessibility / details */}
+              <span className={`text-[8px] uppercase tracking-tighter mt-0.5 block ${
+                isFullyBooked 
+                  ? 'text-[#E53935]/70' 
+                  : isAppointmentOnly 
+                    ? 'text-[#C9A96E]' 
+                    : isSelected 
+                      ? 'text-[#C9A96E]' 
+                      : 'text-[#AAAAAA] opacity-0 group-hover:opacity-100 transition-opacity'
+              }`}>
+                {isFullyBooked ? 'Booked' : isAppointmentOnly ? 'Appt Only' : 'Select'}
+              </span>
+
+              {/* Highlight bar for selection */}
+              {isSelected && (
+                <div className="absolute bottom-1 w-4 h-[2px] bg-[#C9A96E] rounded-full" />
               )}
             </button>
           );
         })}
       </div>
 
+      {/* Legend */}
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-[#F0EBEB] text-[11px] font-inter text-[#6B6B6B]">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full border border-[#F0EBEB] bg-white inline-block" />
+          <span>Available</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[#E53935] font-bold line-through">15</span>
+          <span>Fully Booked</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-[#C9A96E] font-bold text-xs">*</span>
+          <span>Appointment Only</span>
+        </div>
+      </div>
+
       {loading && (
-        <div className="rounded-lg border border-rose-gold/20 bg-white/5 p-4 text-center text-sm text-slate-200">
-          Loading availability…
+        <div className="skeleton-bg rounded-xl p-3 text-center text-xs font-inter text-[#6B6B6B]">
+          Loading availability slots…
         </div>
       )}
     </div>

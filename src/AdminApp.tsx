@@ -5,8 +5,10 @@ import {
   LogOut,
   Users,
   Shield,
-  ChevronLeft,
   ArrowRight,
+  Calendar,
+  AlertCircle,
+  TrendingUp
 } from 'lucide-react';
 import {
   fetchAvailability,
@@ -25,9 +27,9 @@ const LOCK_DURATION_MS = 10 * 60 * 1000;
 const SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
 
 const STATUSES: Record<AvailabilityStatus, { label: string; style: string; emoji: string }> = {
-  open: { label: 'Open', style: 'bg-emerald-100 text-emerald-900', emoji: '🟢' },
-  fully_booked: { label: 'Fully Booked', style: 'bg-rose-100 text-rose-900', emoji: '🔴' },
-  appointment_only: { label: 'Appointment Only', style: 'bg-amber-100 text-amber-900', emoji: '🟡' },
+  open: { label: 'Open', style: 'bg-[#4CAF50]/10 text-[#4CAF50] border border-[#4CAF50]/20', emoji: '🟢' },
+  fully_booked: { label: 'Fully Booked', style: 'bg-[#E53935]/10 text-[#E53935] border border-[#E53935]/20', emoji: '🔴' },
+  appointment_only: { label: 'Appointment Only', style: 'bg-[#C9A96E]/10 text-[#C9A96E] border border-[#C9A96E]/20', emoji: '🟡' },
 };
 
 function formatDate(date: Date | string) {
@@ -60,7 +62,7 @@ export default function AdminApp() {
   const [, setLoadingBookings] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<AvailabilityStatus>('open');
-  const [calendarMonth] = useState(new Date());
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [popupOpen, setPopupOpen] = useState(false);
   const [bulkFrom, setBulkFrom] = useState('');
   const [bulkTo, setBulkTo] = useState('');
@@ -285,386 +287,499 @@ export default function AdminApp() {
     return availabilityMap[key] || getDefaultStatus(key);
   };
 
+  // --- Login Redesign screen ---
   if (!loggedIn) {
     const isLocked = Boolean(lockUntil && lockUntil > Date.now());
     const remainingMin = isLocked && lockUntil ? Math.ceil((lockUntil - Date.now()) / 60000) : 0;
 
     return (
-      <div className="min-h-screen bg-[#F8F4F0] text-slate-900 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-          <div className="flex items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-2xl font-semibold">Charisma Beauty Studio — Admin</h1>
-              <p className="text-sm text-slate-500">Enter the admin password to manage availability and bookings.</p>
+      <div className="min-h-screen bg-[#FDF9F7] text-[#1A1A1A] font-inter flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-[480px] bg-white border border-[#F0EBEB] rounded-[24px] p-8 md:p-10 shadow-luxury space-y-8">
+          
+          <div className="text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-[#FDF9F7] border border-[#F0EBEB] flex items-center justify-center mx-auto text-[#C9A96E]">
+              <Shield size={22} />
             </div>
-            <Shield className="h-8 w-8 text-rose-500" />
+            <h1 className="text-3xl font-garamond font-bold tracking-wider text-[#1A1A1A]">
+              Charisma Admin
+            </h1>
+            <p className="text-xs font-inter text-[#6B6B6B]">
+              Enter password to access studio logs and calendar
+            </p>
           </div>
 
-          <label className="block text-sm font-medium text-slate-700">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
-            disabled={isLocked}
-          />
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-inter font-semibold text-[#1A1A1A]">
+                Secure Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-[#FAFAFA] border border-[#E8E0E0] rounded-[10px] px-4 h-[50px] font-inter text-[15px] focus:border-[#C9A96E] outline-none transition-all placeholder-[#AAAAAA]"
+                disabled={isLocked}
+              />
+            </div>
 
-          {loginError && (
-            <p className="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{loginError}</p>
-          )}
+            {loginError && (
+              <div className="p-3 bg-[#E53935]/5 border border-[#E53935]/15 rounded-lg flex items-center gap-2 text-xs text-[#E53935] animate-fade-in">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
 
-          {isLocked && (
-            <p className="mt-3 text-sm text-slate-500">Too many attempts. Try again in {remainingMin} min.</p>
-          )}
+            {isLocked && (
+              <p className="text-xs text-[#6B6B6B] italic text-center">
+                Portal locked. Please retry in {remainingMin} min.
+              </p>
+            )}
 
-          <button
-            type="button"
-            onClick={handleLogin}
-            disabled={isLocked}
-            className="mt-6 w-full rounded-full bg-rose-600 px-5 py-3 text-white shadow-lg shadow-rose-200/30 transition hover:bg-rose-700"
-          >
-            Unlock Admin Portal
-          </button>
+            <button
+              type="button"
+              onClick={handleLogin}
+              disabled={isLocked}
+              className="w-full h-[52px] bg-[#C9A96E] hover:bg-[#B8935A] text-white rounded-[10px] font-inter font-semibold tracking-wider transition-all duration-300 active-press shadow-md disabled:bg-[#AAAAAA] disabled:opacity-50"
+            >
+              Unlock Admin Portal
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  // --- Dashboard Redesign screen ---
   return (
-    <div className="min-h-screen bg-[#F8F4F0] text-slate-900">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FDF9F7] text-[#1A1A1A] font-inter flex flex-col md:flex-row">
+      
+      {/* Side panel navbar */}
+      <aside className="w-full md:w-64 bg-white border-r border-[#F0EBEB] flex flex-col justify-between p-6 shrink-0">
+        <div className="space-y-8">
+          
+          {/* Logo */}
           <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-rose-500">Secret admin portal</p>
-            <h1 className="mt-2 text-3xl font-semibold">Charisma Beauty Studio — Admin</h1>
+            <h1 className="text-24px font-garamond font-bold text-[#C9A96E] tracking-widest uppercase">Charisma</h1>
+            <span className="text-[9px] uppercase tracking-[0.3em] text-[#AAAAAA] block -mt-1 font-semibold">
+              Secret Admin Portal
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-600"
+
+          {/* Quick Stats side info */}
+          <div className="space-y-4 pt-4 border-t border-[#F0EBEB]">
+            <span className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider block">Studio details</span>
+            <div className="space-y-3 font-inter text-xs text-[#6B6B6B]">
+              <div className="flex items-center gap-2">
+                <Clock size={14} className="text-[#C9A96E]" />
+                <span>Mon-Sat: 8:30-17:30</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-[#C9A96E]" />
+                <span>Sun: Appointment Only</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Logout bottom action */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full py-3.5 border border-[#F0EBEB] rounded-xl text-xs font-semibold text-[#6B6B6B] hover:text-[#E53935] hover:border-[#E53935]/30 transition-all flex items-center justify-center gap-2 active-press mt-8"
+        >
+          <LogOut size={14} />
+          <span>Logout Portal</span>
+        </button>
+      </aside>
+
+      {/* Main Panel space */}
+      <main className="flex-1 p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full overflow-hidden">
+        
+        {/* Top Info Banner */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#F0EBEB]">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-garamond font-bold tracking-tight text-[#1A1A1A]">
+              Dashboard Overview
+            </h2>
+            <p className="text-xs text-[#6B6B6B] mt-0.5">Manage appointment requests and block calendar slots</p>
+          </div>
+          
+          <button 
+            type="button" 
+            onClick={loadData}
+            className="px-4 py-2 border border-[#F0EBEB] bg-white rounded-lg text-xs font-semibold text-[#6B6B6B] hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all active-press flex items-center gap-2 shadow-sm"
           >
-            <LogOut size={16} /> Logout
+            Refresh Database
           </button>
         </div>
-      </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Action/Error Notification Bar */}
         {actionMessage && (
-          <div className="mb-6 rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">{actionMessage}</div>
+          <div className="p-4 bg-[#FDF9F7] border border-[#C9A96E]/20 rounded-xl text-xs text-[#C9A96E] font-medium flex items-center gap-2 animate-fade-in shadow-sm">
+            <CheckCircle2 size={16} className="text-[#C9A96E]" />
+            <span>{actionMessage}</span>
+          </div>
         )}
 
-        <div className="grid gap-6 xl:grid-cols-[1.3fr,0.9fr]">
-          <section className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Bookings this week</p>
-                <p className="mt-4 text-4xl font-semibold text-slate-900">{bookingsThisWeek}</p>
-              </div>
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Pending confirmations</p>
-                <p className="mt-4 text-4xl font-semibold text-slate-900">{pendingCount}</p>
-              </div>
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Fully booked days</p>
-                <p className="mt-4 text-4xl font-semibold text-slate-900">{fullyBookedDaysThisMonth}</p>
-              </div>
+        {/* Stat cards row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          
+          {/* Stats Card 1 */}
+          <div className="bg-white rounded-2xl p-6 border border-[#F0EBEB] shadow-luxury flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#FDF9F7] border border-[#F0EBEB] flex items-center justify-center text-[#C9A96E] shrink-0">
+              <TrendingUp size={20} />
             </div>
-
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Availability manager</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-slate-900">Monthly calendar</h2>
-                </div>
-                <div className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700">
-                  {currentMonthLabel}
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-7 gap-2 text-center text-[11px] uppercase tracking-[0.35em] text-slate-500">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((weekday) => (
-                  <div key={weekday}>{weekday}</div>
-                ))}
-              </div>
-
-              <div className="mt-3 grid grid-cols-7 gap-2">
-                {monthCells.map((cell, index) => {
-                  if (!cell) {
-                    return <div key={`empty-${index}`} className="h-20 rounded-3xl bg-slate-50" />;
-                  }
-                  const isoDate = formatDate(cell);
-                  const dayStatus = getCellStatus(cell);
-                  const statusInfo = STATUSES[dayStatus];
-                  const isToday = formatDate(cell) === formatDate(new Date());
-                  return (
-                    <button
-                      key={isoDate}
-                      type="button"
-                      onClick={() => handleDateCellClick(cell)}
-                      className={`group flex h-20 flex-col justify-between rounded-3xl border px-3 py-3 text-left text-xs transition ${
-                        isToday ? 'border-rose-500/40 bg-rose-50' : 'border-slate-200 bg-white'
-                      } hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-slate-900">{cell.getDate()}</span>
-                        <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-700">
-                          {cell.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2)}
-                        </span>
-                      </div>
-                      <div className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold ${statusInfo.style}`}>
-                        <span>{statusInfo.emoji}</span>
-                        <span>{statusInfo.label}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                {Object.entries(STATUSES).map(([key, info]) => (
-                  <div key={key} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-lg">{info.emoji}</span>
-                      <span className="font-semibold text-slate-900">{info.label}</span>
-                    </div>
-                    <p className="text-slate-500">Tap a day to update the status instantly.</p>
-                  </div>
-                ))}
-              </div>
+            <div>
+              <span className="text-[10px] text-[#AAAAAA] uppercase tracking-wider font-semibold block">Bookings This Week</span>
+              <span className="text-2xl font-bold font-inter text-[#1A1A1A] block mt-0.5">{bookingsThisWeek}</span>
             </div>
+          </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Bulk availability setting</p>
-                  <h2 className="mt-2 text-xl font-semibold text-slate-900">Block out a range</h2>
-                </div>
-                <div className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold uppercase text-slate-700">For holidays</div>
-              </div>
-
-              <div className="mt-6 grid gap-4 md:grid-cols-4">
-                <label className="block text-sm text-slate-700">
-                  From
-                  <input
-                    type="date"
-                    value={bulkFrom}
-                    onChange={(event) => setBulkFrom(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
-                  />
-                </label>
-                <label className="block text-sm text-slate-700">
-                  To
-                  <input
-                    type="date"
-                    value={bulkTo}
-                    onChange={(event) => setBulkTo(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
-                  />
-                </label>
-                <label className="block text-sm text-slate-700">
-                  Mark as
-                  <select
-                    value={bulkStatus}
-                    onChange={(event) => setBulkStatus(event.target.value as AvailabilityStatus)}
-                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
-                  >
-                    <option value="fully_booked">Fully Booked</option>
-                    <option value="appointment_only">Appointment Only</option>
-                    <option value="open">Open</option>
-                  </select>
-                </label>
-                <div className="flex items-end">
-                  <button
-                    type="button"
-                    onClick={applyBulkChanges}
-                    disabled={saving}
-                    className="w-full rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Apply range
-                  </button>
-                </div>
-              </div>
+          {/* Stats Card 2 */}
+          <div className="bg-white rounded-2xl p-6 border border-[#F0EBEB] shadow-luxury flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#FDF9F7] border border-[#F0EBEB] flex items-center justify-center text-[#C9A96E] shrink-0">
+              <Users size={20} />
             </div>
-          </section>
-
-          <aside className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3 text-slate-900">
-                <Clock size={20} className="text-rose-500" />
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Working hours</p>
-                  <p className="mt-2 text-xl font-semibold">Mon - Sat: 8:30 AM - 5:30 PM</p>
-                  <p className="text-sm text-slate-500">Sunday: Appointment Only</p>
-                </div>
-              </div>
+            <div>
+              <span className="text-[10px] text-[#AAAAAA] uppercase tracking-wider font-semibold block">Pending Requests</span>
+              <span className="text-2xl font-bold font-inter text-[#1A1A1A] block mt-0.5">{pendingCount}</span>
             </div>
+          </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3 text-slate-900">
-                <Users size={20} className="text-rose-500" />
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Bookings received</p>
-                  <p className="mt-2 text-xl font-semibold">{bookings.length}</p>
-                </div>
-              </div>
-
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-700">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-xs uppercase tracking-[0.35em]"><th className="py-3">Date</th><th>Name</th><th>Service</th><th>Phone</th><th className="text-right">Status</th></tr>
-                  </thead>
-                  <tbody>
-                    {bookings.slice(0, 5).map((booking) => (
-                      <tr key={booking.id} className="border-b border-slate-100">
-                        <td className="py-3 text-slate-900">{booking.preferred_date}</td>
-                        <td>{booking.client_name}</td>
-                        <td>{booking.service_requested}</td>
-                        <td>{booking.client_phone}</td>
-                        <td className="py-3 text-right">
-                          <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${booking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-900' : booking.status === 'cancelled' ? 'bg-rose-100 text-rose-900' : 'bg-amber-100 text-amber-900'}`}>
-                            {booking.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          {/* Stats Card 3 */}
+          <div className="bg-white rounded-2xl p-6 border border-[#F0EBEB] shadow-luxury flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#FDF9F7] border border-[#F0EBEB] flex items-center justify-center text-[#C9A96E] shrink-0">
+              <Calendar size={20} />
             </div>
-          </aside>
+            <div>
+              <span className="text-[10px] text-[#AAAAAA] uppercase tracking-wider font-semibold block">Fully Booked Days</span>
+              <span className="text-2xl font-bold font-inter text-[#1A1A1A] block mt-0.5">{fullyBookedDaysThisMonth}</span>
+            </div>
+          </div>
+
         </div>
 
-        <section className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Bookings received</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Manage requests</h2>
+        {/* Middle Panel layout split */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Availability Calendar grid (Left cols 2) */}
+          <div className="bg-white rounded-2xl border border-[#F0EBEB] p-6 shadow-luxury lg:col-span-2 space-y-6">
+            
+            <div className="flex justify-between items-center pb-2 border-b border-[#F0EBEB]">
+              <div>
+                <span className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider block">STUDIO SPACE</span>
+                <h3 className="text-lg font-garamond font-bold text-[#1A1A1A] mt-0.5">Availability Grid</h3>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))}
+                  className="w-8 h-8 rounded-full border border-[#F0EBEB] flex items-center justify-center text-xs text-[#6B6B6B] hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all active-press"
+                >
+                  ←
+                </button>
+                <span className="text-sm font-garamond font-bold text-[#1A1A1A]">{currentMonthLabel}</span>
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))}
+                  className="w-8 h-8 rounded-full border border-[#F0EBEB] flex items-center justify-center text-xs text-[#6B6B6B] hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all active-press"
+                >
+                  →
+                </button>
+              </div>
             </div>
+
+            {/* Week Headers */}
+            <div className="grid grid-cols-7 gap-2 text-center text-[10px] font-inter font-semibold uppercase tracking-widest text-[#AAAAAA]">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+                <div key={d} className="py-1">{d}</div>
+              ))}
+            </div>
+
+            {/* Calendar Cells */}
+            <div className="grid grid-cols-7 gap-2">
+              {monthCells.map((cell, index) => {
+                if (!cell) {
+                  return <div key={`empty-${index}`} className="aspect-square rounded-xl bg-[#FDF9F7]/40" />;
+                }
+
+                const isoDate = formatDate(cell);
+                const status = getCellStatus(cell);
+                const isToday = formatDate(cell) === formatDate(new Date());
+
+                return (
+                  <button
+                    key={isoDate}
+                    type="button"
+                    onClick={() => handleDateCellClick(cell)}
+                    className={`group relative aspect-square rounded-xl border flex flex-col justify-between p-2.5 text-left transition-all active-press ${
+                      isToday 
+                        ? 'border-[#C9A96E] bg-[#FDF9F7]' 
+                        : 'border-[#F0EBEB] bg-white hover:border-[#C9A96E]/50'
+                    }`}
+                  >
+                    <span className={`text-xs font-semibold ${isToday ? 'text-[#C9A96E]' : 'text-[#1A1A1A]'}`}>
+                      {cell.getDate()}
+                    </span>
+
+                    {/* Small Status indicator */}
+                    <div className="w-full flex justify-end">
+                      <span className={`w-2 h-2 rounded-full block border ${
+                        status === 'open' 
+                          ? 'bg-[#4CAF50] border-[#4CAF50]/30' 
+                          : status === 'fully_booked' 
+                            ? 'bg-[#E53935] border-[#E53935]/30' 
+                            : 'bg-[#C9A96E] border-[#C9A96E]/30'
+                      }`} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Legend row */}
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-[#F0EBEB] text-[11px] font-inter text-[#6B6B6B]">
+              {Object.entries(STATUSES).map(([key, info]) => (
+                <div key={key} className="flex items-center gap-1.5">
+                  <span className="text-xs">{info.emoji}</span>
+                  <span className="font-semibold text-[#1A1A1A]">{info.label}</span>
+                </div>
+              ))}
+            </div>
+
+          </div>
+
+          {/* Bulk date selection panel (Right col 1) */}
+          <div className="bg-white rounded-2xl border border-[#F0EBEB] p-6 shadow-luxury space-y-6">
+            <div>
+              <span className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider block">BULK SETTINGS</span>
+              <h3 className="text-lg font-garamond font-bold text-[#1A1A1A] mt-0.5">Blockout Range</h3>
+            </div>
+
+            <div className="space-y-4 font-inter text-xs text-[#6B6B6B]">
+              
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-[#1A1A1A]">From Date</label>
+                <input
+                  type="date"
+                  value={bulkFrom}
+                  onChange={(event) => setBulkFrom(event.target.value)}
+                  className="w-full bg-[#FAFAFA] border border-[#E8E0E0] rounded-[10px] px-3 h-[45px] text-xs focus:border-[#C9A96E] outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-[#1A1A1A]">To Date</label>
+                <input
+                  type="date"
+                  value={bulkTo}
+                  onChange={(event) => setBulkTo(event.target.value)}
+                  className="w-full bg-[#FAFAFA] border border-[#E8E0E0] rounded-[10px] px-3 h-[45px] text-xs focus:border-[#C9A96E] outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-[#1A1A1A]">Mark Status As</label>
+                <select
+                  value={bulkStatus}
+                  onChange={(event) => setBulkStatus(event.target.value as AvailabilityStatus)}
+                  className="w-full bg-[#FAFAFA] border border-[#E8E0E0] rounded-[10px] px-3 h-[45px] text-xs focus:border-[#C9A96E] outline-none transition-all cursor-pointer"
+                >
+                  <option value="fully_booked">Fully Booked</option>
+                  <option value="appointment_only">Appointment Only</option>
+                  <option value="open">Open</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={applyBulkChanges}
+                disabled={saving}
+                className="w-full h-[45px] bg-[#C9A96E] hover:bg-[#B8935A] text-white font-semibold rounded-[10px] uppercase tracking-wider transition-all duration-300 active-press shadow-sm mt-4 flex items-center justify-center disabled:bg-[#AAAAAA] disabled:opacity-50"
+              >
+                Apply Range blocker
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Booking requests table log */}
+        <section className="bg-white rounded-2xl border border-[#F0EBEB] p-6 shadow-luxury space-y-6">
+          
+          <div className="flex justify-between items-center pb-2 border-b border-[#F0EBEB]">
+            <div>
+              <span className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider block">CLIENT LOGS</span>
+              <h3 className="text-lg font-garamond font-bold text-[#1A1A1A] mt-0.5">Manage Booking Requests</h3>
+            </div>
+            
             <button
               type="button"
               onClick={loadData}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:bg-rose-50"
+              className="px-4 py-2 border border-[#F0EBEB] bg-white rounded-lg text-xs font-semibold text-[#6B6B6B] hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all active-press flex items-center gap-1 shadow-sm"
             >
-              <ArrowRight size={16} /> Refresh
+              <ArrowRight size={14} />
+              <span>Refresh bookings</span>
             </button>
           </div>
 
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm text-slate-700">
-              <thead className="border-b border-slate-200 text-xs uppercase tracking-[0.35em] text-slate-500">
-                <tr>
-                  <th className="py-3">Date</th>
-                  <th>Name</th>
-                  <th>Service</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                  <th className="text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-4 text-slate-900">{booking.preferred_date}</td>
-                    <td>{booking.client_name}</td>
-                    <td>{booking.service_requested}</td>
-                    <td>{booking.client_phone}</td>
-                    <td>
-                      <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${booking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-900' : booking.status === 'cancelled' ? 'bg-rose-100 text-rose-900' : 'bg-amber-100 text-amber-900'}`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="py-4 text-right">
-                      {booking.status === 'pending' && (
-                        <div className="flex flex-wrap justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              changeBookingStatus(booking, 'confirmed');
-                              sendWhatsAppMessage(booking, true);
-                            }}
-                            className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              changeBookingStatus(booking, 'cancelled');
-                              sendWhatsAppMessage(booking, false);
-                            }}
-                            className="rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-rose-700"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
-                      {booking.status === 'confirmed' && (
-                        <button
-                          type="button"
-                          onClick={() => changeBookingStatus(booking, 'cancelled')}
-                          className="rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-rose-700"
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </td>
+          {/* Bookings table data container */}
+          <div className="w-full overflow-x-auto">
+            {bookings.length === 0 ? (
+              <p className="text-center text-xs text-[#AAAAAA] py-8">No booking requests logged in system</p>
+            ) : (
+              <table className="w-full text-left text-xs font-inter text-[#6B6B6B] min-w-[850px]">
+                
+                <thead className="border-b border-[#F0EBEB] text-[10px] text-[#AAAAAA] uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="pb-3 pt-1">Client name</th>
+                    <th className="pb-3 pt-1">Requested Service</th>
+                    <th className="pb-3 pt-1">Target Date</th>
+                    <th className="pb-3 pt-1">Phone Number</th>
+                    <th className="pb-3 pt-1">Special Notes</th>
+                    <th className="pb-3 pt-1">Status</th>
+                    <th className="pb-3 pt-1 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {bookings.map((booking) => (
+                    <tr key={booking.id} className="border-b border-[#F0EBEB]/50 hover:bg-[#FDF9F7]/60 transition-colors">
+                      <td className="py-4 font-bold text-[#1A1A1A]">{booking.client_name}</td>
+                      <td className="py-4">{booking.service_requested}</td>
+                      <td className="py-4 font-medium text-[#1A1A1A]">{booking.preferred_date}</td>
+                      <td className="py-4">{booking.client_phone}</td>
+                      <td className="py-4 max-w-[200px] truncate">{booking.notes || 'None'}</td>
+                      
+                      <td className="py-4">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-semibold border ${
+                          booking.status === 'confirmed' 
+                            ? 'bg-[#4CAF50]/10 text-[#4CAF50] border-[#4CAF50]/20' 
+                            : booking.status === 'cancelled' 
+                              ? 'bg-[#E53935]/10 text-[#E53935] border-[#E53935]/20' 
+                              : 'bg-[#C9A96E]/10 text-[#C9A96E] border-[#C9A96E]/20'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </td>
+
+                      <td className="py-4 text-right">
+                        {booking.status === 'pending' && (
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                changeBookingStatus(booking, 'confirmed');
+                                sendWhatsAppMessage(booking, true);
+                              }}
+                              className="px-3 py-1.5 bg-[#4CAF50] text-white hover:bg-[#43A047] font-semibold text-[11px] rounded-lg transition-all active-press"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                changeBookingStatus(booking, 'cancelled');
+                                sendWhatsAppMessage(booking, false);
+                              }}
+                              className="px-3 py-1.5 bg-[#E53935] text-white hover:bg-[#D32F2F] font-semibold text-[11px] rounded-lg transition-all active-press"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                        {booking.status === 'confirmed' && (
+                          <button
+                            type="button"
+                            onClick={() => changeBookingStatus(booking, 'cancelled')}
+                            className="px-3 py-1.5 border border-[#E53935]/30 text-[#E53935] hover:bg-[#E53935]/5 font-semibold text-[11px] rounded-lg transition-all active-press"
+                          >
+                            Cancel Slot
+                          </button>
+                        )}
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+
+              </table>
+            )}
           </div>
+
         </section>
+
       </main>
 
+      {/* Date Editor Popup Modal Dialog */}
       {popupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#F0EBEB] space-y-6">
+            
+            <div className="flex items-center justify-between gap-4 pb-2 border-b border-[#F0EBEB]">
               <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-rose-500">Edit day</p>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">{formatDisplay(selectedDate)}</h2>
+                <span className="text-[10px] font-bold text-[#C9A96E] uppercase tracking-wider block">Calendar Setting</span>
+                <h2 className="text-xl font-garamond font-bold text-[#1A1A1A] mt-0.5">
+                  {formatDisplay(selectedDate)}
+                </h2>
               </div>
-              <button type="button" onClick={() => setPopupOpen(false)} className="text-slate-400 transition hover:text-slate-700">
-                <ChevronLeft size={24} />
+              
+              <button 
+                type="button" 
+                onClick={() => setPopupOpen(false)} 
+                className="w-8 h-8 rounded-full border border-[#F0EBEB] text-[#6B6B6B] hover:text-[#1A1A1A] flex items-center justify-center transition-all active-press"
+              >
+                ×
               </button>
             </div>
 
-            <div className="mt-6 space-y-4">
+            <div className="space-y-3 font-inter">
               {Object.entries(STATUSES).map(([key, info]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setSelectedStatus(key as AvailabilityStatus)}
-                  className={`flex w-full items-center justify-between rounded-3xl border px-5 py-4 text-left text-sm font-semibold transition ${
-                    selectedStatus === key ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-slate-50 hover:border-rose-200'
+                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left text-xs font-semibold transition-all ${
+                    selectedStatus === key 
+                      ? 'border-[#C9A96E] bg-[#FDF9F7] text-[#1A1A1A]' 
+                      : 'border-[#F0EBEB] bg-[#FAFAFA] hover:border-[#C9A96E]/50 text-[#6B6B6B]'
                   }`}
                 >
-                  <span>{info.emoji} {info.label}</span>
-                  {selectedStatus === key && <CheckCircle2 className="text-rose-500" />}
+                  <span className="flex items-center gap-2">
+                    <span className="text-sm">{info.emoji}</span>
+                    <span>{info.label}</span>
+                  </span>
+                  
+                  {selectedStatus === key && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#C9A96E]" />
+                  )}
                 </button>
               ))}
             </div>
 
-            <div className="mt-6 flex items-center justify-between gap-3">
+            <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setPopupOpen(false)}
-                className="rounded-full border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="px-4 py-2 border border-[#F0EBEB] bg-white rounded-lg text-xs font-semibold text-[#6B6B6B] hover:border-[#C9A96E] transition-all active-press"
               >
                 Cancel
               </button>
+              
               <button
                 type="button"
                 onClick={saveDateStatus}
                 disabled={saving}
-                className="rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="px-5 py-2 bg-[#C9A96E] hover:bg-[#B8935A] text-white rounded-lg text-xs font-semibold transition-all active-press shadow-sm disabled:bg-[#AAAAAA] disabled:opacity-50"
               >
-                Save
+                Save Changes
               </button>
             </div>
+
           </div>
         </div>
       )}
+
     </div>
   );
 }

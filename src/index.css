@@ -1,54 +1,69 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  background-color: #0A0A0A;
-  color: #FAFAFA;
+  background-color: #FFFFFF;
+  color: #1A1A1A;
 }
 
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
-  background-color: #0A0A0A;
+  background-color: #FFFFFF;
+  color: #1A1A1A;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Cormorant Garamond', serif;
 }
 
-/* Custom Utilities */
+/* Luxury Soft Shadows */
+.luxury-shadow {
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Glassmorphism Styles for Luxury Top and Mobile Navs */
 .glass-effect {
-  background: rgba(10, 10, 10, 0.7);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(183, 110, 121, 0.1);
+  border-bottom: 1px solid #F0EBEB;
 }
 
 .glass-effect-bottom {
-  background: rgba(10, 10, 10, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(183, 110, 121, 0.2);
+  border-top: 1px solid #F0EBEB;
 }
 
+/* Subtle Gold Accent Aesthetics */
 .rose-gold-glow {
-  box-shadow: 0 0 15px rgba(183, 110, 121, 0.3);
+  box-shadow: 0 4px 20px rgba(201, 169, 110, 0.15);
 }
 
 .rose-gold-text-glow {
-  text-shadow: 0 0 8px rgba(183, 110, 121, 0.5);
+  text-shadow: 0 0 8px rgba(201, 169, 110, 0.25);
 }
 
 .rose-gold-border {
-  border: 1px solid rgba(183, 110, 121, 0.5);
+  border: 1px solid #C9A96E;
 }
 
 .rose-gold-gradient {
-  background: linear-gradient(135deg, #B76E79 0%, #F7E7CE 50%, #B76E79 100%);
+  background: linear-gradient(135deg, #C9A96E 0%, #E8D5C4 50%, #C9A96E 100%);
+}
+
+/* Premium Button Active Clicks & Scale Transitions */
+.active-press {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.active-press:active {
+  transform: scale(0.97);
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -62,6 +77,28 @@ body {
   scrollbar-width: none;  /* Firefox */
 }
 
+/* Luxury Skeleton Loader Style */
+.skeleton-bg {
+  background: #F5F0EE;
+  background-image: linear-gradient(
+    90deg,
+    #F5F0EE 0px,
+    #FAF6F4 40px,
+    #F5F0EE 80px
+  );
+  background-size: 250px 100%;
+  animation: shimmer-skeleton 1.5s infinite linear;
+}
+
+@keyframes shimmer-skeleton {
+  0% {
+    background-position: -100px 0;
+  }
+  100% {
+    background-position: 150px 0;
+  }
+}
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -70,3 +107,4 @@ body {
 .animate-fade-in {
   animation: fade-in 1.2s ease-out forwards;
 }
+
