@@ -140,13 +140,28 @@ async function handleBookings(request: Request, env: Env) {
       return json({ error: 'Missing booking fields' }, 400);
     }
 
-    const result = await env.DB.prepare(
-      `INSERT INTO charisma_bookings (client_name, client_phone, service_requested, preferred_date, status, deposit_paid, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-    )
-      .bind(body.client_name, body.client_phone, body.service_requested, formatDate(body.preferred_date), body.status, body.deposit_paid ? 1 : 0, body.notes || '')
-      .run();
+    const preferredDate = formatDate(body.preferred_date);
 
-    return json({ success: true, id: result?.lastRowID });
+    const bookingStmt = env.DB.prepare(
+      `INSERT INTO charisma_bookings (client_name, client_phone, service_requested, preferred_date, status, deposit_paid, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+    ).bind(
+      body.client_name,
+      body.client_phone,
+      body.service_requested,
+      preferredDate,
+      body.status,
+      body.deposit_paid ? 1 : 0,
+      body.notes || '',
+    );
+
+    const availabilityStmt = env.DB.prepare(
+      `INSERT INTO charisma_availability (date, status, created_at, updated_at) VALUES (?, 'fully_booked', datetime('now'), datetime('now')) ON CONFLICT(date) DO UPDATE SET status = excluded.status, updated_at = datetime('now')`,
+    ).bind(preferredDate);
+
+    const results = await env.DB.batch([bookingStmt, availabilityStmt]);
+    const bookingResult = results[0];
+
+    return json({ success: true, id: bookingResult?.lastRowID });
   }
 
   return json({ error: 'Method not allowed' }, 405);
