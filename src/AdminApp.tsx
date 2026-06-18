@@ -48,7 +48,8 @@ function formatDisplay(dateString: string) {
 
 function formatDateToSlashes(dateStr: string): string {
   if (!dateStr) return '';
-  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const cleanDateStr = String(dateStr).slice(0, 10);
+  const match = cleanDateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (match) {
     const [, year, month, day] = match;
     return `${day}/${month}/${year}`;

@@ -214,7 +214,8 @@ export default function App() {
 
   const formatDateToSlashes = (dateStr: string): string => {
     if (!dateStr) return '';
-    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const cleanDateStr = String(dateStr).slice(0, 10);
+    const match = cleanDateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (match) {
       const [, year, month, day] = match;
       return `${day}/${month}/${year}`;
@@ -227,7 +228,20 @@ export default function App() {
     if (!isFormValid || selectedDateStatus === 'fully_booked') return;
 
     const formattedDate = formatDateToSlashes(formData.date);
-    const message = `Hello Charisma Beauty Studio! I'd like to book ${selectedService?.name} on ${formattedDate}. Name: ${formData.name}. Phone: ${formData.phone}. Special requests: ${formData.notes || 'None'}. I will send proof of $10 deposit payment.`;
+    const locationDisplay = location === 'house_call' ? '🏡 House Call' : '💄 Studio Visit';
+    const message = `Hello Charisma Beauty Studio! I'd like to book a session:
+
+✨ Service: ${selectedService?.name}
+📅 Date: ${formattedDate}
+⏰ Time: ${formData.time || 'Not specified'}
+📍 Location: ${locationDisplay}
+🎈 Event Type: ${formData.eventType || 'Not specified'}
+
+👤 Client: ${formData.name}
+📞 Phone: ${formData.phone}
+📝 Special Notes: ${formData.notes || 'None'}
+
+I will send proof of the $10 deposit payment shortly to secure my slot. Thank you!`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/263777554619?text=${encodedMessage}`;
 
