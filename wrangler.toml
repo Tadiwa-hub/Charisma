@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "CHARISMA_DB"
-database_id = "ac7a0e85-4788-4b49-89dd-95653a462f03"
+database_id = "462bb574-db46-4cb6-a24b-f00ba1033e71"
